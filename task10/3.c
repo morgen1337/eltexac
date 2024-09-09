@@ -5,75 +5,140 @@
 #include <sys/wait.h>
 #include <string.h>
 
-void commandparser(char *command, char *program, char **arguments){
+#define NSIZE 100
+
+struct cmddata
+{
+    char program[NSIZE];
+    char *arguments[NSIZE];
+};
+
+int commandparser(char *command, struct cmddata *cmd)
+{
     int i = 0;
     int parserindex = 0;
     int word = 0;
-    while (1){
-        if (command[i] != ' ' && command[i] != '\0'){
-            if (word == 0){
-                program[parserindex] = command[i];
+    int ncmds = 0;
+    while (1)
+    {
+        if (command[i] != ' ' && command[i] != '\0')
+        {
+            if (command[i] == '|')
+            {
+                cmd[ncmds].arguments[word] = NULL;
+                ncmds++;
+                word = 0;
+                parserindex = -1;
             }
-            else{
-                arguments[word][parserindex] = command[i];
+            else if (word == 0)
+            {
+                cmd[ncmds].program[parserindex] = command[i];
+            }
+            else
+            {
+                cmd[ncmds].arguments[word][parserindex] = command[i];
             }
             parserindex++;
         }
-        else {
-            if (word == 0){
-                program[parserindex] = '\0';
+        else
+        {
+            if (parserindex != 0)
+            {
+                if (word == 0)
+                {
+                    cmd[ncmds].program[parserindex] = '\0';
+                }
+                else
+                {
+                    cmd[ncmds].arguments[word][parserindex] = '\0';
+                }
+                parserindex = 0;
+                word++;
+                cmd[ncmds].arguments[word] = malloc(NSIZE * sizeof(char));
             }
-            else{
-                arguments[word][parserindex] = '\0';
-            }
-            parserindex = 0;
-            word++;
         }
         if (command[i] == '\0')
             break;
         i++;
-        
     }
-    arguments[word] = NULL;
+    cmd[ncmds].arguments[word] = NULL;
+    ncmds++;
+    return ncmds;
 };
 
-int main(){
+int main()
+{
     pid_t childpid;
     int status;
-    
+    int fd[2];
+    pipe(fd);
     char ch;
     int i;
-    while(1) {
-        char command[100];
-        char program[100];
-        char *arguments[100];
-        for (int j = 0; j < 100; j++){
-            arguments[j] = malloc(100 * sizeof(char));
-        }
+    int ncmds;
+    char command[NSIZE];
+    struct cmddata cmd[NSIZE];
+    for (int b = 0; b < NSIZE; b++)
+    {   
+        cmd[b].arguments[0] = malloc(NSIZE * sizeof(char));
+    }
+    while (1)
+    {
         i = 0;
-        while ((ch = getchar()) != '\n' && i < 100) {
+        while ((ch = getchar()) != '\n' && i < NSIZE)
+        {
             command[i++] = ch;
         }
         command[i] = '\0';
-        commandparser(command, program, arguments);
-        if (strcmp(program, "exit") == 0)
+        ncmds = commandparser(command, cmd);
+        if (!strcmp(command, "exit") || !strcmp(command, "") )
             break;
+
         childpid = fork();
-        if (!childpid){
-            if (execvp(program, arguments) == -1){ // до меня дошло, что можно было обойтись без program, просто используя 0ой элемент в arguments, но я уже написал так и всё работает поэтому оставляю)
-                perror("");
-                exit(EXIT_FAILURE);
+                if (!childpid){
+                    close(fd[0]);
+                    dup2(fd[1], STDOUT_FILENO);
+                    if (execvp(cmd[0].program, cmd[0].arguments) == -1){
+                        perror("");
+                        exit(EXIT_FAILURE);
+                    }
+                }
+                else{
+                    wait(&status);
+            }
+
+        for (int j = 1; j < ncmds - 1; j++)
+        {
+                childpid = fork();
+                if (!childpid){
+                    dup2(fd[0], STDIN_FILENO);
+                    dup2(fd[1], STDOUT_FILENO);
+                    if (execvp(cmd[j].program, cmd[j].arguments) == -1){
+                        perror("");
+                        exit(EXIT_FAILURE);
+                    }
+                }
+                else{
+                    wait(&status);
             }
         }
-        else{
-            wait(&status);
+
+        childpid = fork();
+                if (!childpid){
+                    close(fd[1]);
+                    dup2(fd[0], STDIN_FILENO);
+                    if (execvp(cmd[ncmds - 1].program, cmd[ncmds - 1].arguments) == -1){
+                        perror("");
+                        exit(EXIT_FAILURE);
+                    }
+                }
+                else{
+                    wait(&status);
+            }
     }
-    
-            for (int j = 0; j < 100; j++){
-        free(arguments[j]);
+    for (int b = 0; b < NSIZE; b++)
+    {   
+        free(cmd[b].arguments[0]);
     }
-    
-    }
-    
+
     return 0;
 }

@@ -1,4 +1,4 @@
-all: hello/TCPlocalclient hello/TCPlocalserver hello/UDPlocalserver hello/UDPlocalclient
+all: hello/TCPlocalclient hello/TCPlocalserver hello/UDPlocalserver hello/UDPlocalclient hello/TCPinetserver hello/TCPinetclient
 
 hello/TCPlocalclient: hello/TCPlocalclient.c
 	gcc $< -o $@
@@ -10,4 +10,10 @@ hello/UDPlocalserver: hello/UDPlocalserver.c
 	gcc $< -o $@
 
 hello/UDPlocalclient: hello/UDPlocalclient.c
+	gcc $< -o $@
+
+hello/TCPinetserver: hello/TCPinetserver.c
+	gcc $< -o $@
+
+hello/TCPinetclient: hello/TCPinetclient.c
 	gcc $< -o $@

@@ -19,7 +19,7 @@ int main(){
     }
     memset(&addr, 0, sizeof(addr));
     addr.sun_family = AF_LOCAL;
-    strcpy(addr.sun_path, "hello/localserversocket");
+    strcpy(addr.sun_path, "localserversocket");
     if (connect(client_socket, (struct sockaddr *) &addr, sizeof(addr)) == -1)
         {
             perror("connect");
@@ -28,5 +28,6 @@ int main(){
     write(client_socket, msg, sizeof(msg));
     read(client_socket, buf, N);
     printf("message received from server: %s\n", buf);
+    close(client_socket);
     return 0;
 }

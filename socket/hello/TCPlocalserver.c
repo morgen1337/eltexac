@@ -17,8 +17,7 @@ int main(){
         perror("server_socket");    
     memset(&serv, 0, sizeof(serv));
     serv.sun_family = AF_LOCAL;
-    unlink("hello/localserversocket");
-    strcpy(serv.sun_path, "hello/localserversocket");
+    strcpy(serv.sun_path, "localserversocket");
     if (bind(server_socket, (struct sockaddr *)&serv, sizeof(serv)) == -1){
         perror("bind");
         exit(EXIT_FAILURE);
@@ -33,6 +32,7 @@ int main(){
     read(client_socket, buf, N);
     printf("message received from client: %s\n", buf);
     write(client_socket, msg, N);
-    
+    close(server_socket);
+    unlink("localserversocket");
     return 0;
 }

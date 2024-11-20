@@ -34,7 +34,7 @@ struct udpmsg{
 
 int main(){
     struct udpmsg msg;
-    msg.header.length = htons(sizeof(struct udpmsg));
+    msg.header.length = htons(sizeof(struct udpheader) + sizeof(msg.msg));
     msg.header.destport = htons(7777);
     msg.header.sourceport = htons(7778);
     msg.header.checksum = 0;
@@ -66,7 +66,7 @@ int main(){
     addr.sin_family = AF_INET;
     addr.sin_port = 0;
     inet_pton(AF_INET, "127.0.0.1", &(addr.sin_addr.s_addr));
-    if (sendto(fd, &msg, sizeof(msg), 0, (struct sockaddr *) &addr, sizeof(addr) == -1)){
+    if (sendto(fd, &msg, sizeof(msg), 0, (struct sockaddr *) &addr, sizeof(addr)) == -1){
         perror("socket");
         exit(EXIT_FAILURE);
     }

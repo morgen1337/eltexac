@@ -18,8 +18,8 @@ int main(){
     socklen_t sizeofclientaddr = sizeof(clientaddr);
     recvfrom(fd, msg, 8, 0, (struct sockaddr *) &clientaddr, &sizeofclientaddr);
     printf("got message from raw client - %s\n", msg);
-    msg[strlen(msg)] = '!';
     msg[strlen(msg)+1] = '\0';
+    msg[strlen(msg)] = '!';
     printf("%d\n", ntohs(clientaddr.sin_port));
     if (sendto(fd, &msg, sizeof(msg), 0, (struct sockaddr *) &clientaddr, sizeofclientaddr) == -1){
         perror("sendto");

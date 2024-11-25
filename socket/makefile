@@ -1,4 +1,4 @@
-all: hello/TCPlocalclient hello/TCPlocalserver hello/UDPlocalserver hello/UDPlocalclient hello/TCPinetserver hello/TCPinetclient 1parralelserver/client 1parralelserver/server 2pool/server 2pool/client 3queue/server 3queue/client 4universalserver/server 4universalserver/tcpclient 4universalserver/udpclient broadcast/server broadcast/client multicast/server multicast/client rawsniff/sniff udpraw/client udpraw/server udpraw/clientWITH_ip_header udpraw/ethernet
+all: hello/TCPlocalclient hello/TCPlocalserver hello/UDPlocalserver hello/UDPlocalclient hello/UDPinetserver hello/UDPinetclient hello/TCPinetserver hello/TCPinetclient 1parralelserver/client 1parralelserver/server 2pool/server 2pool/client 3queue/server 3queue/client 4universalserver/server 4universalserver/tcpclient 4universalserver/udpclient broadcast/server broadcast/client multicast/server multicast/client rawsniff/sniff udpraw/client udpraw/server udpraw/clientWITH_ip_header udpraw/ethernet
 hello/TCPlocalclient: hello/TCPlocalclient.c
 	gcc $< -o $@
 
@@ -10,6 +10,13 @@ hello/UDPlocalserver: hello/UDPlocalserver.c
 
 hello/UDPlocalclient: hello/UDPlocalclient.c
 	gcc $< -o $@
+
+hello/UDPinetserver: hello/UDPinetserver.c
+	gcc $< -o $@
+
+hello/UDPinetclient: hello/UDPinetclient.c
+	gcc $< -o $@
+
 
 hello/TCPinetserver: hello/TCPinetserver.c
 	gcc $< -o $@
